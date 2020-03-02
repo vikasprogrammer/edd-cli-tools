@@ -28,7 +28,7 @@ WP_CLI::add_command( 'edd', 'EDD_CLI_Toolbox' );
  */
 class EDD_CLI_Toolbox extends EDD_CLI {
 
-	//wp edd update_download 57 --version=1.0.1 --file_path=/tmp/file.zip
+	//wp edd update_download 57 --version=1.0.1 --file_path=/tmp/file.zip --changelog=/file/path.txt
 
 	public function new_release ( $args, $assoc_args ) {
 
@@ -53,11 +53,18 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		$version    = isset( $assoc_args['version'] ) ? $assoc_args['version'] : false;
 		$file_path = isset( $assoc_args['file_path'] ) ? $assoc_args['file_path'] : false;
+		$changelog = isset( $assoc_args['changelog'] ) ? $assoc_args['changelog'] : false;
 
 		if($version == false || $file_path == false) {
 			WP_CLI::error( 'Version or file path missing (--version= --file_path=)');
 			exit;
 		}
+
+		if($changelog !== false && file_exists($changelog)) {
+			$changelog = file_get_contents($changelog);
+			// echo $changelog;
+		}
+
 
 	
 
@@ -126,6 +133,22 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 		update_post_meta( $download_id, '_edd_sl_version', (string) $version );
 
 		update_post_meta( $download_id, '_edd_sl_upgrade_file_key', 4 );
+
+		
+		if($changelog !== false) {
+			$prev_changelog = get_post_meta( $download_id, '_edd_sl_changelog' );
+			if(is_array($prev_changelog)) {
+				$prev_changelog = $prev_changelog[0];
+			}
+
+			// var_dump($prev_changelog);exit;
+
+			$new_changelog = $changelog . "<p></p>" . $prev_changelog;
+
+			update_post_meta( $download_id, '_edd_sl_changelog', $new_changelog);
+		}
+				
+
 
 		WP_CLI::success( 'All done!');
 
