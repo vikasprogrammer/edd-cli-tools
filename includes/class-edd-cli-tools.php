@@ -66,6 +66,24 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 			exit;
 		}
 
+		$files = get_post_meta( $download_id , 'edd_download_files');
+		$files = $files[0];
+// var_dump($files);exit;
+		if(count($files) > 0) {
+			$latest_file = $files[count($files)];
+			if($latest_file['name'] == basename($file_path)) {
+				WP_CLI::error( 'Looks like you have already uploaded this file ' . basename($file_path));
+				exit;
+			}
+		}
+
+		$current_version = get_post_meta( $download_id, '_edd_sl_version', (string) $version );
+
+		if($current_version == $version) {
+			WP_CLI::error( 'Looks like you have already set this version ' .$version);
+				exit;
+		}
+
 		$file_array = array(
 		    'name' => basename( $file_path ),
 		    'tmp_name' => $file_path
@@ -97,8 +115,7 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		$file_url = wp_get_attachment_url( $attachment_id );
 
-		$files = get_post_meta( $download_id , 'edd_download_files');
-		$files = $files[0];
+		
 
 
 		$new_file = ["thumbnail_size" => false, "name" => basename($file_path), "file" => $file_url, "condition" => "all"];
