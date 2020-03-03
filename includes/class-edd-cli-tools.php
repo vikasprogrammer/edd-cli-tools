@@ -42,10 +42,14 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 			$title = isset( $assoc_args['title'] ) ? $args[0] : false;
 			// if($download_id == )
 			if($title) {
-				$args = array("post_type" => "download", "s" => $title);
-				$downloads = get_posts( $args );
+				// $args = array("post_type" => "download", "s" => $title);
+				// $downloads = get_posts( $args );
+				global $wpdb;
+				$downloads = $wpdb->get_results( $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_type = 'download' AND post_title LIKE '%s'", '%'. $wpdb->esc_like( $title ) .'%') );
+
+				// var_dump($downloads);exit;
 				if(count($downloads) > 1) {
-					WP_CLI::error("Multiple downloads foundw with that title");
+					WP_CLI::error("Multiple downloads found with that title");
 				} elseif (count($downloads) == 0) {
 					WP_CLI::error("Download not found with that title");
 				} else {
