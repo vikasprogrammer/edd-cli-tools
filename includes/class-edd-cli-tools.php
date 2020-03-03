@@ -151,7 +151,7 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		update_post_meta( $download_id, '_edd_sl_version', (string) $version );
 
-		update_post_meta( $download_id, '_edd_sl_upgrade_file_key', 4 );
+		update_post_meta( $download_id, '_edd_sl_upgrade_file_key', count($files) );
 
 		
 		if($changelog !== false) {
