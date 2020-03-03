@@ -28,7 +28,7 @@ WP_CLI::add_command( 'edd', 'EDD_CLI_Toolbox' );
  */
 class EDD_CLI_Toolbox extends EDD_CLI {
 
-	//wp edd update_download 57 --version=1.0.1 --file_path=/tmp/file.zip --changelog=/file/path.txt
+	//wp edd update_download 57|"title of product" --version=1.0.1 --file_path=/tmp/file.zip --changelog=/file/path.txt --title=true
 
 	public function new_release ( $args, $assoc_args ) {
 
@@ -39,25 +39,41 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		} else {
 			$download_id = $args[0];
-			$download = get_post( $args[0] );
+			$title = isset( $assoc_args['title'] ) ? $args[0] : false;
+			// if($download_id == )
+			if($title) {
+				$args = array("post_type" => "download", "s" => $title);
+				$downloads = get_posts( $args );
+				if(count($downloads) > 1) {
+					WP_CLI::error("Multiple downloads foundw with that title");
+				} elseif (count($downloads) == 0) {
+					WP_CLI::error("Download not found with that title");
+				} else {
+					$download = $downloads[0];
+				}
+			} else {
+				$download = get_post( $args[0] );
+			}
+			
 			// echo $license->post_type;
 
 			if ( ! $download || 'download' !== $download->post_type ) {
+
 				\WP_CLI::error( sprintf( __( 'No product was found with ID %d.' ), $download_id ) );
 			} else {
-				WP_CLI::success( 'Found the product with ID ' . $download_id );
+				WP_CLI::success( 'Found the product - ' . $download_id );
 			}
 
 		}
 
 
-		$version    = isset( $assoc_args['version'] ) ? $assoc_args['version'] : false;
+		$version = isset( $assoc_args['version'] ) ? $assoc_args['version'] : false;
 		$file_path = isset( $assoc_args['file_path'] ) ? $assoc_args['file_path'] : false;
 		$changelog = isset( $assoc_args['changelog'] ) ? $assoc_args['changelog'] : false;
 
 		if($version == false || $file_path == false) {
 			WP_CLI::error( 'Version or file path missing (--version= --file_path=)');
-			exit;
+			
 		}
 
 		if($changelog !== false && file_exists($changelog)) {
@@ -70,7 +86,6 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		if(!file_exists($file_path)) {
 			WP_CLI::error( 'File doesnt exist' );
-			exit;
 		}
 
 		$files = get_post_meta( $download_id , 'edd_download_files');
@@ -80,7 +95,6 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 			$latest_file = $files[count($files)];
 			if($latest_file['name'] == basename($file_path)) {
 				WP_CLI::error( 'Looks like you have already uploaded this file ' . basename($file_path));
-				exit;
 			}
 		}
 
@@ -88,7 +102,6 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		if($current_version == $version) {
 			WP_CLI::error( 'Looks like you have already set this version ' .$version);
-				exit;
 		}
 
 		$file_array = array(
@@ -117,7 +130,6 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		if ( is_wp_error( $result ) ) {
 		    WP_CLI::error("File upload error");
-		    exit;
 		}
 
 		$file_url = wp_get_attachment_url( $attachment_id );

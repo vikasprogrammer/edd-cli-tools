@@ -3,7 +3,7 @@
  * Plugin Name: Easy Digital Downloads - WP_CLI Tools
  * Plugin URI: https://easydigitaldownloads.com
  * Description: Adds a set of tools for managing EDD through WP_CLI
- * Author: Pippin Williamson and Company
+ * Author: Vikas Singhal
  * Author URI: https://easydigitaldownloads.com
  * Version: 0.1
  * Text Domain: easy-digital-downloads
