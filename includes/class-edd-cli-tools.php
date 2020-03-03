@@ -54,7 +54,10 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 					WP_CLI::error("Download not found with that title");
 				} else {
 					$download = $downloads[0];
+					$download_id = $download->ID;
 				}
+
+
 			} else {
 				$download = get_post( $args[0] );
 			}
@@ -65,7 +68,7 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 				\WP_CLI::error( sprintf( __( 'No product was found with ID %d.' ), $download_id ) );
 			} else {
-				WP_CLI::success( 'Found the product - ' . $download_id );
+				WP_CLI::success( 'Found the product ID - ' . $download_id );
 			}
 
 		}
