@@ -53,9 +53,10 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 				} elseif (count($downloads) == 0) {
 					WP_CLI::error("Download not found with that title");
 				} else {
-					WP_CLI::line("Download found with title - {$download->post_title}");
+
 					$download = $downloads[0];
 					$download_id = $download->ID;
+					WP_CLI::line("Download found with title - {$download->post_title}");
 				}
 
 
