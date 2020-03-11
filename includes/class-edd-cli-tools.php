@@ -29,8 +29,9 @@ WP_CLI::add_command( 'edd', 'EDD_CLI_Toolbox' );
 class EDD_CLI_Toolbox extends EDD_CLI {
 
 	public function fetch_changelogs ( $args, $assoc_args ) {
-		$args = array("post_type" => "download");
-		$downloads = get_posts( $args );		
+		global $wpdb;
+		$downloads = $wpdb->get_results( $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_type = 'download'" ));
+		echo count($downloads)." download(s) found ... \n\n";	
 
 		foreach ($downloads as $download) {
 			echo "Changelog for ".$download->post_title."\n";
