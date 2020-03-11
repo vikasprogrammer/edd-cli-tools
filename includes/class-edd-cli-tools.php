@@ -28,7 +28,19 @@ WP_CLI::add_command( 'edd', 'EDD_CLI_Toolbox' );
  */
 class EDD_CLI_Toolbox extends EDD_CLI {
 
-	//wp edd update_download 57|"title of product" --version=1.0.1 --file_path=/tmp/file.zip --changelog=/file/path.txt --title=true
+	public function fetch_changelogs ( $args, $assoc_args ) {
+		$args = array("post_type" => "download");
+		$downloads = get_posts( $args );		
+
+		foreach ($downloads as $download) {
+			echo "Changelog for ".$download->post_title."\n";
+			$changelog = get_post_meta( $download->ID, '_edd_sl_changelog');
+			echo $changelog[0]."\n====\n";
+		}
+
+	}
+
+	//wp edd update_download 57|"title of product" --version=1.0.1 --file_path=/tmp/file.zip --changelog=/file/path.txt --changelog_prepend=true --title=true 
 
 	public function new_release ( $args, $assoc_args ) {
 
@@ -79,6 +91,8 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 		$version = isset( $assoc_args['version'] ) ? $assoc_args['version'] : false;
 		$file_path = isset( $assoc_args['file_path'] ) ? $assoc_args['file_path'] : false;
 		$changelog = isset( $assoc_args['changelog'] ) ? $assoc_args['changelog'] : false;
+
+		$changelog_prepend = isset( $assoc_args['changelog_prepend'] ) ? $assoc_args['changelog_prepend'] : false;
 
 		if($version == false || $file_path == false) {
 			WP_CLI::error( 'Version or file path missing (--version= --file_path=)');
@@ -153,18 +167,23 @@ class EDD_CLI_Toolbox extends EDD_CLI {
 
 		update_post_meta( $download_id, '_edd_sl_version', (string) $version );
 
-		update_post_meta( $download_id, '_edd_sl_upgrade_file_key', count($files) );
+		update_post_meta( $download_id, '_edd_sl_upgrade_file_key', count($files) - 1);
 
 		
 		if($changelog !== false) {
-			$prev_changelog = get_post_meta( $download_id, '_edd_sl_changelog' );
-			if(is_array($prev_changelog)) {
-				$prev_changelog = $prev_changelog[0];
+
+			if($changelog_prepend == true) {
+				$prev_changelog = get_post_meta( $download_id, '_edd_sl_changelog' );
+				if(is_array($prev_changelog)) {
+					$prev_changelog = $prev_changelog[0];
+				}
+
+				// var_dump($prev_changelog);exit;
+
+				$new_changelog = $changelog . "<p></p>" . $prev_changelog;
+			} else {
+				$new_changelog = $changelog;
 			}
-
-			// var_dump($prev_changelog);exit;
-
-			$new_changelog = $changelog . "<p></p>" . $prev_changelog;
 
 			update_post_meta( $download_id, '_edd_sl_changelog', $new_changelog);
 		}
